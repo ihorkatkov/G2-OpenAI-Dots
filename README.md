@@ -2,6 +2,16 @@
 
 Keep your phone in your pocket. Ask your personal assistant in ChatGPT (your Dot) a question through Even AI and read the answer on your Even Realities G2 lenses. Your always-on host keeps the inbox available when your laptop is off.
 
+## Connect an existing inbox
+
+If you have the prepared **g2-dot-link.zip** for your inbox, its server address is already inside. You can pair your glasses without running the executable or setting up DNS.
+
+1. In ChatGPT on the web, select **Plugins → Add → Upload plugin** and choose the ZIP. In a managed workspace, check **Admin console → Plugins**. Availability depends on upload permissions. [ChatGPT plugin uploads](https://help.openai.com/en/articles/20001256-plugins-in-chatgpt)
+2. Connect the plugin. If prompted for an OAuth client secret, use the inbox’s `DOT_CLIENT_SECRET`. On the pairing page, enter `DOT_PAIR`. Enable the plugin in your personal Dot conversation and ask **“Connect my glasses.”** The ZIP includes the subscription and reply instructions.
+3. In the Even phone app, open **Settings → Even AI → Agent Configuration**. Name the agent **Dot**, paste the **Even AI endpoint** from your inbox operator, and enter `DOT_EVEN_TOKEN`. Save, activate, and ask a question.
+
+Each package points to one wearer’s inbox. The operator provides credentials privately. ChatGPT and Even AI both reach the running service over HTTPS. A hosting provider’s address works without buying a domain.
+
 ## Try it with one command
 
 Put the release executable for your platform in an empty directory, name it `g2-dot-link`, and open a terminal there. If you need to build a copy, see [Build from source](#build-from-source).
@@ -14,20 +24,23 @@ The local demo uses a simulated Dot to show what happens when an answer arrives 
 
 ```text
 You: What’s a simple vinaigrette ratio?
-Glasses: Question saved. Ask "What did Dot say?" to check for a reply.
+Glasses: Question saved.
 Dot’s reply is now in your inbox.
 
-You: What did Dot say?
-Glasses: Three parts oil to one part vinegar.
+You: Which mustard goes well with that?
+Glasses: Earlier replies:
+Three parts oil to one part vinegar.
+
+Question saved.
 ```
 
-On your glasses, an answer that arrives within 90 seconds appears on the original request. For later answers, ask **“What did Dot say?”** again to collect each ready reply in question order.
+On your glasses, an answer that arrives within 90 seconds appears on the original request. If a reply arrives late, ask your next question normally. That request collects **all ready replies** in question order. Your new question also goes to Dot.
 
-## Connect your own glasses
+## Host an inbox and prepare its plugin
 
-You’ll need an always-on macOS or Linux host with persistent disk, a public HTTPS domain pointing to it, a personal Dot with custom MCP plugin access, and **Agent Configuration** in the Even phone app. This inbox serves one wearer.
+You’ll need an always-on macOS or Linux host with persistent disk, a stable public HTTPS URL (your host can provide one), a personal Dot with custom MCP plugin access, and **Agent Configuration** in the Even phone app. This inbox serves one wearer.
 
-**1. Start the inbox.** In the directory where you want to keep it, replace the example domain with yours.
+**1. Start the inbox.** In the directory where you want to keep it, use the HTTPS origin assigned to your service.
 
 ```sh
 ./g2-dot-link serve https://glasses.example.com
@@ -35,7 +48,7 @@ You’ll need an always-on macOS or Linux host with persistent disk, a public HT
 
 Leave it running. The command creates private credentials in `service.env`, stores the inbox in `data/`, and prints the two URLs you’ll use below. You can rerun the same command after a restart. For always-on use, run it under your service manager. [Hosting guide](#hosting-reference)
 
-Point your HTTPS reverse proxy at `127.0.0.1:8080`. With Caddy, use the following site block. Allow inbound HTTPS on the host and outbound HTTPS to Dot. Set any upstream response timeout to at least 100 seconds.
+If your platform provides HTTPS, route it to the listener. If you manage TLS yourself, point your HTTPS reverse proxy at `127.0.0.1:8080`. With Caddy, use the following site block. Allow inbound HTTPS on the host and outbound HTTPS to Dot. Set any upstream response timeout to at least 100 seconds.
 
 ```caddyfile
 glasses.example.com {
@@ -51,22 +64,13 @@ Open `https://glasses.example.com/health` in a browser and look for `"status":"o
 
 A fresh inbox answers **“Dot is not connected. Subscribe to glasses questions in ChatGPT first.”** That means the local service accepted your glasses token and is ready to pair.
 
-**2. Connect ChatGPT.** Open **Plugins → Add → Add custom MCP server**. Name it **Glasses inbox** and paste the **ChatGPT plugin URL** printed at startup. Under **OAuth → Advanced OAuth settings → User-Defined OAuth Client**, enter:
+**2. Prepare the upload.** From the inbox directory, run:
 
-| ChatGPT field | Value |
-| --- | --- |
-| Client ID | `g2-dot-link` |
-| Client secret | Copy `DOT_CLIENT_SECRET` from your private `service.env` |
-| Token endpoint authentication | `client_secret_basic` |
-| Scope, if requested | `glasses` |
+```sh
+./g2-dot-link plugin
+```
 
-Click **Connect**. On the pairing page, paste `DOT_PAIR` from the same file. Then paste this instruction into your **personal Dot conversation**:
-
-> Subscribe to the Glasses inbox glasses.question event. For each event, answer its text in at most 350 plain-text characters and call reply_to_glasses with the event’s question_id and your answer.
-
-Wait for Dot to confirm the subscription. Run `./g2-dot-link ask "What is seventeen plus twenty-six?"` to check the live connection. Expect **43**, or use `./g2-dot-link ask "What did Dot say?"` to collect a late reply.
-
-**3. Connect Even AI.** On your phone, open **Settings → Even AI → Agent Configuration**. Name the agent **Dot**, paste the **Even AI endpoint** printed at startup, and enter `DOT_EVEN_TOKEN` as the token. A private password manager shared with your phone makes the token easier to paste. Save, activate, and ask the same question on your glasses.
+Give the wearer `g2-dot-link.zip` and the Even AI endpoint printed at startup. The archive contains only the plugin manifest, public MCP connection settings and instructions for Dot. Follow [Connect an existing inbox](#connect-an-existing-inbox) to pair.
 
 ## If you get stuck
 
@@ -77,7 +81,7 @@ Wait for Dot to confirm the subscription. Run `./g2-dot-link ask "What is sevent
 | Pairing page shows “Invalid request” | In ChatGPT, check the plugin URL printed at startup and the client ID `g2-dot-link`, then start Connect again. |
 | Pairing code rejected | Use the value after `DOT_PAIR=` from the running inbox’s file. |
 | Dot is disconnected | Ask your personal Dot to subscribe again. Check that the plugin is connected. |
-| “Question saved” on every request | Ask for the late reply. Check the proxy timeout and whether Dot called `reply_to_glasses`. |
+| “Question saved” on every request | Ask another question normally to receive any ready replies. Check the proxy timeout and whether Dot called `reply_to_glasses`. |
 | The terminal gets answers but Even AI returns 401 | Check the active agent, the `/even` endpoint, and `DOT_EVEN_TOKEN` on the phone. |
 
 ## Build from source
@@ -85,8 +89,8 @@ Wait for Dot to confirm the subscription. Run `./g2-dot-link ask "What is sevent
 With Rust 1.92 or newer and a C toolchain on macOS or Linux, run:
 
 ```sh
-git clone https://github.com/ihorkatkov/g2-dot-link.git
-cd g2-dot-link
+git clone https://github.com/ihorkatkov/G2-OpenAI-Dots.git
+cd G2-OpenAI-Dots
 cargo build --release --locked
 ./target/release/g2-dot-link demo
 ```

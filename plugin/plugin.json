@@ -1,0 +1,6 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "g2-dot-link",
+  "version": "0.1.0",
+  "description": "Receive questions from your Even G2 glasses and send short answers back to the lenses."
+}

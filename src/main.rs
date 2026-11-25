@@ -4,6 +4,7 @@ mod config;
 mod even;
 mod first_use;
 mod mcp;
+mod plugin;
 
 use axum::{
     Json, Router,
@@ -245,13 +246,14 @@ const HELP: &str = "G2 Dot Link — ask your personal Dot a question from your g
   g2-dot-link serve <HTTPS_ORIGIN>   Create and start your inbox
   g2-dot-link serve                 Restart from service.env or exported settings
   g2-dot-link ask \"<question>\"      Ask through the running inbox from this host
+  g2-dot-link plugin                Create the ChatGPT upload ZIP for this inbox
   g2-dot-link configure <HTTPS_ORIGIN>   Create credentials without starting
   g2-dot-link --version             Print the version";
 
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().skip(1).collect();
     let command = args.first().map(String::as_str);
-    let mut settings = if matches!(command, Some("serve" | "ask")) {
+    let mut settings = if matches!(command, Some("serve" | "ask" | "plugin")) {
         config::Settings::read()?
     } else {
         config::Settings::default()
@@ -293,6 +295,12 @@ fn run() -> Result<(), String> {
                 return runtime()?.block_on(serve(current));
             }
             runtime()?.block_on(serve(config::Config::load(&settings)?))
+        }
+        [cmd] if cmd == "plugin" => {
+            let value = settings
+                .get("DOT_ORIGIN")
+                .ok_or("Run g2-dot-link plugin in the configured inbox directory")?;
+            plugin::write(&config::origin(&value)?)
         }
         [cmd] if cmd == "demo" => runtime()?.block_on(first_use::demo()),
         [cmd, text] if cmd == "ask" => {

@@ -135,8 +135,8 @@ pub async fn demo() -> Result<(), String> {
     if body(response).await?["result"]["isError"] != false {
         return Err("Could not save demo reply".into());
     }
-    println!("Dot’s reply is now in your inbox.\n\nYou: What did Dot say?");
-    let answer = ask(&config, "What did Dot say?").await?;
+    println!("Dot’s reply is now in your inbox.\n\nYou: Which mustard goes well with that?");
+    let answer = ask(&config, "Which mustard goes well with that?").await?;
     println!("Glasses: {}", answer.text);
     Ok(())
 }

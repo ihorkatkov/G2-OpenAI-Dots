@@ -485,7 +485,7 @@ fn protocol_and_migrated_inbox() {
         .unwrap();
     assert_eq!(note.status(), 202);
     assert!(note.bytes().unwrap().is_empty());
-    assert_eq!(content(&server.ask("What did Dot say?")), "prior reply");
+    assert!(content(&server.ask("ordinary question")).contains("Earlier replies:\nprior reply"));
     assert!(content(&server.ask("private question marker")).contains("not connected"));
     for (url, code) in [
         ("http://callback.example", -32602),
@@ -732,7 +732,9 @@ fn signed_webhook_round_trip_restart_and_retry() {
             server.save(&token, &old, "recovered reply")["isError"],
             false
         );
-        assert_eq!(content(&server.ask("what did dot say?")), "recovered reply");
+        assert!(
+            content(&server.ask("another question")).contains("Earlier replies:\nrecovered reply")
+        );
     }
     // All five waiting requests retain their permits while OAuth/MCP remain responsive.
     thread::scope(|scope| {
@@ -778,7 +780,6 @@ fn signed_webhook_round_trip_restart_and_retry() {
     let second = server.ask("second");
     let _third = server.ask("third");
     assert!(content(&first).contains("Question saved"));
-    assert!(content(&server.ask("What did Dot say?")).contains("not replied"));
     assert_eq!(
         server.save(&token, second["id"].as_str().unwrap(), "second reply")["isError"],
         false
@@ -789,9 +790,36 @@ fn signed_webhook_round_trip_restart_and_retry() {
     );
     drop(server);
     let mut server = setup.start("0");
-    assert_eq!(content(&server.ask("What did DOT say!")), "first reply");
-    assert_eq!(content(&server.ask("what did dot say.")), "second reply");
-    assert!(content(&server.ask("What did Dot say?")).contains("not replied"));
+    let collected = server.ask("What about tomorrow?");
+    assert!(content(&collected).contains("Earlier replies:\nfirst reply\n\nsecond reply"));
+    assert!(content(&collected).contains("Question saved"));
+    until(|| {
+        seen.lock()
+            .unwrap()
+            .iter()
+            .any(|event| event["data"]["text"] == "What about tomorrow?")
+    });
+    assert_eq!(
+        server.save(&token, collected["id"].as_str().unwrap(), "tomorrow reply")["isError"],
+        false
+    );
+    thread::scope(|scope| {
+        let a = scope.spawn(|| server.ask("another ordinary question"));
+        let b = scope.spawn(|| server.ask("one more"));
+        let results = [a.join().unwrap(), b.join().unwrap()];
+        assert_eq!(
+            results
+                .iter()
+                .filter(|v| content(v).contains("tomorrow reply"))
+                .count(),
+            1
+        );
+        assert!(
+            results.iter().all(
+                |v| !content(v).contains("first reply") && !content(v).contains("second reply")
+            )
+        );
+    });
     assert_eq!(
         server.rpc(&token, "events/unsubscribe", p.clone())["result"],
         json!({})
@@ -849,8 +877,8 @@ fn log_level_and_empty_inbox() {
             .is_ok()
     });
     assert_eq!(
-        content(&server.ask("what did dot say?")),
-        "There are no glasses questions yet."
+        content(&server.ask("Hello")),
+        "Dot is not connected. Subscribe to glasses questions in ChatGPT first."
     );
     assert_eq!(server.post("/token").send().unwrap().status(), 401);
     assert_eq!(server.get("/missing").status(), 404);
@@ -876,7 +904,7 @@ fn binary_only_first_use_and_restart() {
     assert!(demo.status.success());
     let output = String::from_utf8(demo.stdout).unwrap();
     assert!(output.contains("simulated Dot"));
-    assert!(output.contains("Glasses: Three parts oil to one part vinegar."));
+    assert!(output.contains("Earlier replies:\nThree parts oil to one part vinegar."));
     assert_eq!(fs::read_dir(&path).unwrap().count(), 0);
 
     let addr = TcpListener::bind("127.0.0.1:0")
@@ -924,4 +952,42 @@ fn binary_only_first_use_and_restart() {
         .unwrap();
     assert!(!conflict.status.success());
     assert_eq!(fs::read(path.join("service.env")).unwrap(), before);
+}
+
+#[test]
+fn plugin_zip_is_bound_to_this_inbox_and_contains_only_public_files() {
+    use std::io::Read;
+    let setup = Setup::new();
+    let result = cmd(setup.dir.path()).arg("plugin").output().unwrap();
+    assert!(result.status.success());
+    let mut archive =
+        zip::ZipArchive::new(fs::File::open(setup.dir.path().join("g2-dot-link.zip")).unwrap())
+            .unwrap();
+    let mut contents = HashMap::new();
+    for i in 0..archive.len() {
+        let mut entry = archive.by_index(i).unwrap();
+        let mut body = String::new();
+        entry.read_to_string(&mut body).unwrap();
+        for k in [
+            "DOT_DB",
+            "DOT_EVEN_TOKEN",
+            "DOT_PAIR",
+            "DOT_CLIENT_SECRET",
+            "DOT_OWNER_ID",
+        ] {
+            assert!(!body.contains(&setup.vars[k]));
+        }
+        contents.insert(entry.name().to_owned(), body);
+    }
+    assert_eq!(contents.len(), 3);
+    let plugin: Value = serde_json::from_str(&contents["plugin.json"]).unwrap();
+    assert_eq!(plugin["name"], "g2-dot-link");
+    let mcp: Value = serde_json::from_str(&contents["mcp.json"]).unwrap();
+    let server = &mcp["mcpServers"]["glasses-inbox"];
+    assert_eq!(server["url"], format!("{ORIGIN}/mcp"));
+    assert_eq!(
+        server["extensions"]["com.openai"]["auth"]["client"]["clientId"],
+        "g2-dot-link"
+    );
+    assert!(contents["skills/glasses-inbox/SKILL.md"].contains("reply_to_glasses"));
 }
