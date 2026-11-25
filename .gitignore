@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+.ruff_cache/
+.env
+.env.*
+*.env
+*.sqlite*
+data/
+.DS_Store
