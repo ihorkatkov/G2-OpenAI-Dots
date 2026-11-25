@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pair your Dot · G2 Dot Link</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f4f5ef; color: #18241d; font: 1rem/1.55 system-ui, sans-serif; }
+  main { max-width: 29rem; margin: clamp(2rem, 13vh, 8rem) auto; padding: 0 1.5rem; }
+  header { padding-bottom: .6rem; border-bottom: 2px solid #375d42; font-weight: 650; }
+  h1 { font: 500 clamp(2.1rem, 7vw, 3.1rem)/1.04 Georgia, serif; letter-spacing: -.045em; margin: 1.8rem 0 .8rem; }
+  p { margin: 0 0 1.6rem; }
+  label { display: block; font-weight: 650; }
+  small { display: block; color: #46524a; margin: .25rem 0 .55rem; }
+  input, button { font: inherit; border-radius: .4rem; width: 100%; padding: .65rem .85rem; }
+  input { background: white; color: inherit; border: 1px solid #7b897e; }
+  button { margin-top: 1rem; background: #254d34; color: white; border: 0; cursor: pointer; font-weight: 600; }
+  :focus-visible { outline: 3px solid #2469a7; outline-offset: 2px; }
+  [role=alert] { color: #92391c; margin: .5rem 0 0; }
+</style>
+<main>
+<header>G2 Dot Link</header>
+<h1>Pair your Dot</h1>
+<p>Let your personal Dot receive questions from your glasses and send answers back.</p>
+<form method="post">
+<label for="pair">Owner pairing code</label>
+<small id="hint">Copy the value of <code>DOT_PAIR</code> from <code>service.env</code> on your host.</small>
+<input id="pair" name="pair" type="password" aria-describedby="hint" required>
+<!--feedback-->
+<button type="submit">Connect to ChatGPT</button>
+</form>
+</main>
+</html>
