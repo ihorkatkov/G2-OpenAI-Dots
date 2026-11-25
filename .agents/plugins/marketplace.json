@@ -1,0 +1,10 @@
+{
+  "name": "g2-dot-link-marketplace",
+  "interface": { "displayName": "G2 Dot Link" },
+  "plugins": [
+    {
+      "name": "g2-dot-link",
+      "source": { "source": "local", "path": "./plugin" }
+    }
+  ]
+}

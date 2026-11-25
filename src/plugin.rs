@@ -22,7 +22,7 @@ pub fn write(origin: &str) -> Result<(), String> {
     let mut zip = ZipWriter::new(Cursor::new(Vec::new()));
     let options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::Stored);
     for (name, body) in [
-        ("plugin.json", include_str!("../plugin/plugin.json")),
+        ("plugin.json", include_str!("../packaging/zip-plugin.json")),
         ("mcp.json", mcp.as_str()),
         (
             "skills/glasses-inbox/SKILL.md",

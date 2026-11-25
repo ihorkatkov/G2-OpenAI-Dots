@@ -1,0 +1,12 @@
+{
+  "name": "g2-dot-link",
+  "version": "0.1.0",
+  "description": "Ask Dot through Even AI and read its replies on your G2 lenses.",
+  "apps": "./.app.json",
+  "skills": "./skills",
+  "interface": {
+    "displayName": "G2 Dot Link",
+    "shortDescription": "Answer questions from your Even G2 glasses",
+    "category": "Productivity"
+  }
+}
