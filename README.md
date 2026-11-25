@@ -23,6 +23,6 @@ Even AI sends your question to a private inbox, which forwards it to Dot and ret
 3. **Connect Dot.** Connect the inbox in ChatGPT, enter the pairing code, and use the operator’s OAuth client secret if prompted. Enable the plugin in your personal Dot conversation and ask **“Connect my glasses.”** Wait for subscription confirmation.
 4. **Connect Even AI.** In the Even phone app, open **Settings → Even AI → Agent Configuration**. Name the agent **Dot**, paste the endpoint and glasses token, save, and activate. Ask **“What’s a simple vinaigrette ratio?”** A prompt reply appears on the lenses. If you see **“Question saved”**, ask your next question normally.
 
-On **personal Pro**, use **Plugins → Add → Upload plugin archive** with the ZIP prepared for your inbox, then continue at **Connect Dot**.
+If **Import marketplace** is missing from your Add menu, use **Plugins → Add → Upload plugin archive** with the ZIP prepared for your inbox, then continue at **Connect Dot**.
 
 [Hosting and troubleshooting](docs/hosting.md) · [Release tests](docs/testing.md)

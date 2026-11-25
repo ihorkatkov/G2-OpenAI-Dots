@@ -32,7 +32,7 @@ A fresh inbox answers **“Dot is not connected. Subscribe to glasses questions 
 ./g2-dot-link plugin
 ```
 
-For personal ChatGPT accounts, give the wearer `g2-dot-link.zip`. For a managed workspace, use the [marketplace setup](../README.md#connect-your-glasses). For either route, share the Even AI endpoint printed at startup and the three values from the private `service.env` file directly with the wearer: `DOT_PAIR` (pairing code), `DOT_CLIENT_SECRET` (OAuth client secret), and `DOT_EVEN_TOKEN` (glasses token). The archive contains only the plugin manifest, public MCP connection settings and instructions for Dot. Follow [Connect your glasses](../README.md#connect-your-glasses) to pair.
+If the wearer’s Add menu offers **Upload plugin archive** only as a package installation option, give them `g2-dot-link.zip`. For GitHub imports, use the [marketplace setup](../README.md#connect-your-glasses). For either route, share the Even AI endpoint printed at startup and the three values from the private `service.env` file directly with the wearer: `DOT_PAIR` (pairing code), `DOT_CLIENT_SECRET` (OAuth client secret), and `DOT_EVEN_TOKEN` (glasses token). The archive contains only the plugin manifest, public MCP connection settings and instructions for Dot. Follow [Connect your glasses](../README.md#connect-your-glasses) to pair.
 
 ## If you get stuck
 
