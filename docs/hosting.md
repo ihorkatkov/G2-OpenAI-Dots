@@ -32,7 +32,7 @@ A fresh inbox answers **“Dot is not connected. Subscribe to glasses questions 
 ./g2-dot-link plugin
 ```
 
-For personal ChatGPT accounts, give the wearer `g2-dot-link.zip`. For a managed workspace, use the [marketplace setup](../README.md#for-workspace-admins). For either route, share the Even AI endpoint printed at startup and the three values from the private `service.env` file directly with the wearer: `DOT_PAIR` (pairing code), `DOT_CLIENT_SECRET` (OAuth client secret), and `DOT_EVEN_TOKEN` (glasses token). The archive contains only the plugin manifest, public MCP connection settings and instructions for Dot. Follow [Connect your glasses](../README.md#connect-your-glasses) to pair.
+For personal ChatGPT accounts, give the wearer `g2-dot-link.zip`. For a managed workspace, use the [marketplace setup](../README.md#connect-your-glasses). For either route, share the Even AI endpoint printed at startup and the three values from the private `service.env` file directly with the wearer: `DOT_PAIR` (pairing code), `DOT_CLIENT_SECRET` (OAuth client secret), and `DOT_EVEN_TOKEN` (glasses token). The archive contains only the plugin manifest, public MCP connection settings and instructions for Dot. Follow [Connect your glasses](../README.md#connect-your-glasses) to pair.
 
 ## If you get stuck
 
@@ -78,3 +78,7 @@ To change the glasses token, update `DOT_EVEN_TOKEN`, restart the service, and p
 </details>
 
 Independent community project. [ChatGPT plugin setup](https://developers.openai.com/plugins/deploy/connect-chatgpt) · [Even’s custom agent guide](https://support.evenrealities.com/hc/en-us/articles/16280926743695-Tutorial-Bridging-G2-to-OpenClaw-Bring-Your-Own-Agent)
+
+## Use your own inbox with the marketplace
+
+Register your inbox’s MCP connection in your ChatGPT workspace and give the wearer access to that app. Fork this repository and replace the app ID in [plugin/.app.json](../plugin/.app.json) with your app’s ID. Use your fork’s URL in the [marketplace import step](../README.md#connect-your-glasses). [ChatGPT marketplace guide](https://learn.chatgpt.com/docs/enterprise/plugin-management)
